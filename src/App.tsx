@@ -1,8 +1,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
-import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-import "react-phone-number-input/style.css";
+import { getCountries, getCountryCallingCode } from "react-phone-number-input";
+import type { Country } from "react-phone-number-input";
+import countryLabels from "react-phone-number-input/locale/en.json";
+import { AsYouType, parsePhoneNumberFromString } from "libphonenumber-js";
+import finalRevealImage from "./assets/final-reveal.jpeg";
 
 // ─── Pixel Icons ────────────────────────────────────────────────────────────
 
@@ -468,7 +471,53 @@ function CelebrationScreen({ onContinue }: { onContinue: () => void }) {
 
 // ─── Screen 4: Baba Request ───────────────────────────────────────────────────
 
-async function submitToWeb3Forms(phone: string): Promise<void> {
+const preferredCountries: Country[] = ["AE", "IN", "SA", "QA", "KW", "OM", "BH", "GB", "US"];
+
+function countryFlag(country: Country) {
+  return country
+    .toUpperCase()
+    .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+}
+
+function countryName(country: Country) {
+  return countryLabels[country] || country;
+}
+
+function formatCountry(country: Country) {
+  return `${countryFlag(country)} ${countryName(country)} (+${getCountryCallingCode(country)})`;
+}
+
+function orderedCountries() {
+  const countries = getCountries();
+  const preferred = preferredCountries.filter((country) => countries.includes(country));
+  const rest = countries
+    .filter((country) => !preferredCountries.includes(country))
+    .sort((a, b) => countryName(a).localeCompare(countryName(b)));
+
+  return [...preferred, ...rest];
+}
+
+function normalizePhone(country: Country, nationalPhone: string) {
+  const parsed = parsePhoneNumberFromString(nationalPhone, country);
+
+  if (!parsed || !parsed.isValid()) {
+    return null;
+  }
+
+  return {
+    country: formatCountry(country),
+    phone: parsed.formatNational(),
+    fullNumber: parsed.number,
+  };
+}
+
+function formatNationalInput(country: Country, value: string) {
+  return new AsYouType(country).input(value);
+}
+
+const web3FormsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "6b5635a8-90ff-4e81-adcf-88eba61eb142";
+
+async function submitBabaNumber(payload: { country: string; phone: string; fullNumber: string }): Promise<void> {
   const res = await fetch("https://api.web3forms.com/submit", {
     method: "POST",
     headers: {
@@ -476,48 +525,58 @@ async function submitToWeb3Forms(phone: string): Promise<void> {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      access_key: "6b5635a8-90ff-4e81-adcf-88eba61eb142",
-      to_email: "ff4im123@gmail.com",
-      subject: "💌 Love Appointment — Baba's Number",
-      "baba-number": phone,
-      message: `Baba's number: ${phone}`,
+      access_key: web3FormsAccessKey,
+      subject: "Love Appointment - Baba's Number",
       from_name: "Love Appointment",
+      country: payload.country,
+      phone: payload.phone,
+      full_number: payload.fullNumber,
+      message: [
+        "Baba's number submitted from Love Appointment.",
+        "",
+        `Country: ${payload.country}`,
+        `Phone: ${payload.phone}`,
+        `Full number: ${payload.fullNumber}`,
+      ].join("\n"),
+      botcheck: false,
     }),
   });
 
-  const data = await res.json();
+  const data = await res.json().catch(() => null);
 
-  console.log("Web3Forms response:", data);
-
-  if (!res.ok || !data.success) {
-    throw new Error(data.message || "Web3Forms submission failed");
+  if (!res.ok || data?.success === false) {
+    throw new Error(data?.message || "Phone number submission failed");
   }
 }
 
 function BabaScreen({ onSubmit }: { onSubmit: () => void }) {
-  const [phone, setPhone] = useState<string | undefined>();
+  const [country, setCountry] = useState<Country>("AE");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const normalizedPhone = normalizePhone(country, phone);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone) {
+    const submission = normalizePhone(country, phone);
+
+    if (!phone.trim()) {
       setError("Please enter a number.");
       return;
     }
-    if (!isValidPhoneNumber(phone)) {
+    if (!submission) {
       setError("That doesn't look like a valid number…");
       return;
     }
     setError("");
     setSubmitting(true);
     try {
-  await submitToWeb3Forms(phone);
-  setSubmitting(false);
-  onSubmit();
-    } catch {
-  setSubmitting(false);
-  setError("Oops… something went wrong. Please try again ❤️");
+      await submitBabaNumber(submission);
+      setSubmitting(false);
+      onSubmit();
+    } catch (err) {
+      setSubmitting(false);
+      setError(err instanceof Error ? err.message : "Oops… something went wrong. Please try again ❤️");
     }
   };
 
@@ -566,21 +625,51 @@ function BabaScreen({ onSubmit }: { onSubmit: () => void }) {
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
-            {/* Phone input with country selector */}
+            <label className="baba-field-label" htmlFor="baba-country">
+              Country
+            </label>
+            <div className="baba-country-wrap" style={{ marginBottom: "1rem" }}>
+              <select
+                id="baba-country"
+                className="baba-country-select"
+                value={country}
+                onChange={(e) => {
+                  setCountry(e.target.value as Country);
+                  setPhone((value) => formatNationalInput(e.target.value as Country, value));
+                  setError("");
+                }}
+                aria-label="Country"
+              >
+                {orderedCountries().map((option) => (
+                  <option key={option} value={option}>
+                    {formatCountry(option)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <label className="baba-field-label" htmlFor="baba-phone">
+              Phone Number
+            </label>
             <div className="baba-phone-wrap" style={{ marginBottom: "1rem" }}>
-              <PhoneInput
-                international
-                defaultCountry="AE"
+              <input
+                id="baba-phone"
+                className="baba-phone-input"
                 value={phone}
-                onChange={(v) => { setPhone(v); setError(""); }}
+                onChange={(e) => {
+                  setPhone(formatNationalInput(country, e.target.value));
+                  setError("");
+                }}
+                inputMode="tel"
+                autoComplete="tel-national"
+                placeholder="50 123 4567"
                 aria-label="Baba's phone number"
               />
             </div>
 
-            {/* Formatted preview */}
-            {phone && isValidPhoneNumber(phone) && (
+            {normalizedPhone && (
               <p style={{ fontFamily: "VT323, monospace", fontSize: "1rem", color: "#FF5C9A", marginBottom: "0.75rem", textAlign: "center", letterSpacing: "0.05em" }}>
-                ✓ {phone}
+                ✓ {normalizedPhone.fullNumber}
               </p>
             )}
 
@@ -693,19 +782,15 @@ function FinalScreen({ onReplay }: { onReplay: () => void }) {
           </span>
         </div>
         <div className="px-6 py-10">
-          {/* Placeholder final image — replace with your actual image */}
           <div
-            className="w-full mb-6 flex items-center justify-center"
-            style={{ background: "#FFF0F6", border: "4px solid #FFD6E5", minHeight: 200 }}
+            className="w-full mb-6 overflow-hidden"
+            style={{ background: "#FFF0F6", border: "4px solid #FFD6E5" }}
           >
-            <div className="text-center py-8">
-              <div className="heartbeat mb-4" style={{ display: "inline-block" }}>
-                <PixelHeart size={64} color="#FF5C9A" />
-              </div>
-              <p style={{ fontFamily: "Pixelify Sans, monospace", fontSize: "0.85rem", color: "#D92F70" }}>
-                [ your image goes here ]
-              </p>
-            </div>
+            <img
+              src={finalRevealImage}
+              alt="A tiny kitten holding a red flower"
+              style={{ display: "block", width: "100%", height: "auto" }}
+            />
           </div>
 
           <h2

@@ -12,6 +12,7 @@
   "dependencies": {
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^13.1.0",
+    "libphonenumber-js": "^1.13.11",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-phone-number-input": "^3.4.17"

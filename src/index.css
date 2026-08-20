@@ -187,73 +187,68 @@ body {
   animation: sparkle 1.2s ease-in-out infinite;
 }
 
-/* ─── react-phone-number-input pixel overrides ─────────────────────────── */
+/* ─── Baba phone form ──────────────────────────────────────────────────── */
 
-.baba-phone-wrap .PhoneInput {
-  display: flex;
-  gap: 0;
+.baba-field-label {
+  display: block;
+  margin-bottom: 0.45rem;
+  font-family: 'VT323', monospace;
+  font-size: 1.1rem;
+  color: #4A1830;
+  letter-spacing: 0.08em;
+}
+
+.baba-country-wrap,
+.baba-phone-wrap {
+  position: relative;
   border: 4px solid #4A1830;
   background: #FFF0F6;
+  box-shadow: inset 3px 3px 0 #FFD6E5;
 }
 
-.baba-phone-wrap .PhoneInputCountry {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 10px 12px;
-  background: #FFD6E5;
-  border-right: 4px solid #4A1830;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.baba-phone-wrap .PhoneInputCountrySelect {
+.baba-country-wrap::after {
+  content: '▼';
   position: absolute;
-  inset: 0;
-  opacity: 0;
-  cursor: pointer;
-  width: 100%;
-  height: 100%;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #D92F70;
+  font-family: 'VT323', monospace;
+  font-size: 1rem;
+  pointer-events: none;
 }
 
-.baba-phone-wrap .PhoneInputCountryIcon {
-  width: 24px;
-  height: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.baba-phone-wrap .PhoneInputCountryIcon--square {
-  width: 20px;
-}
-
-.baba-phone-wrap .PhoneInputCountrySelectArrow {
-  color: #4A1830;
-  font-size: 0.65rem;
-  margin-left: 2px;
-}
-
-.baba-phone-wrap .PhoneInputInput {
+.baba-country-select,
+.baba-phone-input {
   font-family: 'Pixelify Sans', monospace;
   font-size: 1.1rem;
-  padding: 10px 14px;
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 42px 12px 14px;
   background: #FFF0F6;
   color: #4A1830;
   border: none;
   outline: none;
-  flex: 1;
-  min-width: 0;
   letter-spacing: 0.04em;
 }
 
-.baba-phone-wrap .PhoneInputInput::placeholder {
-  color: #D92F70;
-  opacity: 0.5;
+.baba-country-select {
+  cursor: pointer;
+  appearance: none;
 }
 
-.baba-phone-wrap .PhoneInputInput:focus {
+.baba-phone-input {
+  padding-right: 14px;
+}
+
+.baba-country-select:focus,
+.baba-phone-input:focus {
   background: #FFFFFF;
+}
+
+.baba-phone-input::placeholder {
+  color: #D92F70;
+  opacity: 0.5;
 }
 
 @media (prefers-reduced-motion: reduce) {
