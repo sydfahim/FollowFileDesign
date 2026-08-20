@@ -469,7 +469,7 @@ function CelebrationScreen({ onContinue }: { onContinue: () => void }) {
 // ─── Screen 4: Baba Request ───────────────────────────────────────────────────
 
 async function submitToWeb3Forms(phone: string): Promise<void> {
-  const key = import.meta.env.VITE_WEB3FORMS_KEY as string | undefined;
+  const key = "6b5635a8-90ff-4e81-adcf-88eba61eb142";
   if (!key) {
     console.info("[dev] Would submit to ff4im123@gmail.com:", phone);
     return;
@@ -505,13 +505,13 @@ function BabaScreen({ onSubmit }: { onSubmit: () => void }) {
     setError("");
     setSubmitting(true);
     try {
-      await submitToWeb3Forms(phone);
+  await submitToWeb3Forms(phone);
+  setSubmitting(false);
+  onSubmit();
     } catch {
-      // Silently continue — don't block the experience on a network error
+  setSubmitting(false);
+  setError("Oops… something went wrong. Please try again ❤️");
     }
-    setSubmitting(false);
-    onSubmit();
-  };
 
   return (
     <motion.div
