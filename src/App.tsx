@@ -469,22 +469,28 @@ function CelebrationScreen({ onContinue }: { onContinue: () => void }) {
 // ─── Screen 4: Baba Request ───────────────────────────────────────────────────
 
 async function submitToWeb3Forms(phone: string): Promise<void> {
-  const key = "6b5635a8-90ff-4e81-adcf-88eba61eb142";
-  if (!key) {
-    console.info("[dev] Would submit to ff4im123@gmail.com:", phone);
-    return;
-  }
   const res = await fetch("https://api.web3forms.com/submit", {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
     body: JSON.stringify({
-      access_key: key,
+      access_key: "6b5635a8-90ff-4e81-adcf-88eba61eb142",
       subject: "💌 Love Appointment — Baba's Number",
       "baba-number": phone,
       message: `Baba's number: ${phone}`,
+      from_name: "Love Appointment",
     }),
   });
-  if (!res.ok) throw new Error("Submission failed");
+
+  const data = await res.json();
+
+  console.log("Web3Forms response:", data);
+
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || "Web3Forms submission failed");
+  }
 }
 
 function BabaScreen({ onSubmit }: { onSubmit: () => void }) {
