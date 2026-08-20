@@ -518,6 +518,7 @@ function BabaScreen({ onSubmit }: { onSubmit: () => void }) {
   setSubmitting(false);
   setError("Oops… something went wrong. Please try again ❤️");
     }
+  };
 
   return (
     <motion.div
