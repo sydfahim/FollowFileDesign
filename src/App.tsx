@@ -477,6 +477,7 @@ async function submitToWeb3Forms(phone: string): Promise<void> {
     },
     body: JSON.stringify({
       access_key: "6b5635a8-90ff-4e81-adcf-88eba61eb142",
+      to_email: "ff4im123@gmail.com",
       subject: "💌 Love Appointment — Baba's Number",
       "baba-number": phone,
       message: `Baba's number: ${phone}`,
