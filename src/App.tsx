@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { Variants } from "framer-motion";
 import confetti from "canvas-confetti";
 import { getCountries, getCountryCallingCode } from "react-phone-number-input";
 import type { Country } from "react-phone-number-input";
@@ -146,7 +147,7 @@ function FloatingDecor() {
 
 type Screen = "intro" | "question" | "celebration" | "baba" | "loading" | "final";
 
-const pageVariants = {
+const pageVariants: Variants = {
   initial: { opacity: 0, y: 24 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
   exit: { opacity: 0, y: -24, transition: { duration: 0.25 } },

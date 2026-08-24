@@ -433,10 +433,10 @@ Final direction:
 Retro visual language + modern UX.
 
 
-18. FIGMA PHASE
----------------
+18. DESIGN PHASE
+----------------
 
-Create a Figma file:
+Create a design file:
 
 LOVE APPOINTMENT
 
@@ -458,8 +458,8 @@ Do not design dozens of screens.
 Focus on the actual experience.
 
 
-19. FIGMA PROTOTYPE
--------------------
+19. INTERACTION PROTOTYPE
+-------------------------
 
 Prototype:
 
@@ -877,10 +877,10 @@ Do not dilute it with unnecessary features.
 38. RECOMMENDED WORKFLOW
 ------------------------
 
-1. Figma moodboard
-2. Figma visual system
-3. Figma screen designs
-4. Figma interaction prototype
+1. Design moodboard
+2. Visual system
+3. Screen designs
+4. Interaction prototype
 5. React/Vite setup
 6. Build functional flow
 7. Add NO/YES interactions
